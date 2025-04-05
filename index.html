@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Let Me Google That For You: Barry Stanchio</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+            padding-top: 120px;
+            width: 100%;
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .logo img {
+            max-width: 272px;
+            width: 100%;
+            height: auto;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 584px;
+            width: 90%;
+            margin: 0 auto 30px auto;
+        }
+        
+        .search-box {
+            width: 100%;
+            height: 46px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            padding: 0 20px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(32, 33, 36, 0.1);
+        }
+        
+        .search-box:hover, .search-box:focus {
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+            border-color: rgba(223, 225, 229, 0);
+        }
+        
+        .search-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .search-button {
+            background-color: #f8f9fa;
+            border: 1px solid #f8f9fa;
+            border-radius: 4px;
+            color: #3c4043;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin: 11px 4px;
+            padding: 0 16px;
+            height: 36px;
+            cursor: pointer;
+        }
+        
+        .search-button:hover {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dadce0;
+        }
+        
+        .results-page {
+            display: none;
+            width: 100%;
+        }
+        
+        .search-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            border-bottom: 1px solid #ebebeb;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            width: 100%;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 768px;
+        }
+        
+        .header-logo {
+            height: 30px;
+            width: auto;
+            margin-right: 20px;
+        }
+        
+        .header-search-container {
+            flex-grow: 1;
+            max-width: 584px;
+        }
+        
+        .header-search {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            padding: 0 20px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(32, 33, 36, 0.1);
+        }
+        
+        .search-results {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 15px;
+            width: 100%;
+        }
+        
+        .result {
+            margin-bottom: 30px;
+        }
+        
+        .result-url {
+            color: #202124;
+            font-size: 14px;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+        
+        .result-title {
+            color: #1a0dab;
+            font-size: 20px;
+            font-weight: normal;
+            margin: 0;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        
+        .result-title:hover {
+            text-decoration: underline;
+        }
+        
+        .result-description {
+            color: #4d5156;
+            font-size: 14px;
+            line-height: 1.58;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 24px;
+            background-color: #000;
+            position: absolute;
+            top: 11px;
+            left: 21px;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .loading-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            display: none;
+        }
+        
+        a {
+            text-decoration: none;
+        }
+        
+        @keyframes cursorAnimation {
+            0% { left: 21px; opacity: 1; }
+            20% { opacity: 1; }
+            30% { left: 160px; opacity: 1; }
+            40% { left: 160px; opacity: 1; }
+            45% { opacity: 0; }
+            50% { opacity: 1; }
+            55% { opacity: 0; }
+            60% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        @keyframes buttonAnimation {
+            0% { background-color: #f8f9fa; }
+            70% { background-color: #f8f9fa; }
+            80% { background-color: #e6e6e6; }
+            90% { background-color: #f8f9fa; }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding-top: 80px;
+            }
+            
+            .logo img {
+                max-width: 180px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .header-logo {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .header-search-container {
+                width: 90%;
+            }
+            
+            .search-box, .header-search {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="search-page">
+        <div class="logo">
+            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="Google Logo">
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-box" value="Barry Stanchio">
+            <div class="cursor" id="cursor"></div>
+        </div>
+        <div class="search-buttons">
+            <button class="search-button" id="search-btn">Google Search</button>
+            <button class="search-button">I'm Feeling Lucky</button>
+        </div>
+        <div class="loading-text" id="loading-text">Searching for Barry Stanchio...</div>
+    </div>
+    
+    <div class="results-page" id="results-page">
+        <div id="easter-egg" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 1000; text-align: center; padding-top: 50px; overflow: hidden;">
+            <div class="animation-container" style="width: 100%; height: 60%; position: relative;">
+                <!-- T-Rex Animation -->
+                <div id="trex" style="position: absolute; left: -300px; top: 50%; transform: translateY(-50%); width: 300px; height: 180px;">
+                    <svg width="300" height="180" viewBox="0 0 300 180">
+                        <g id="trex-body">
+                            <path d="M50,80 L120,80 L150,50 L190,50 L200,60 L200,90 L220,100 L220,120 L200,130 L180,130 L170,120 L150,120 L140,130 L130,130 L120,120 L110,120 L100,130 L60,130 L50,120 L40,120 L30,130 L20,130 L10,120 L10,100 L30,90 L30,90 L40,80" fill="#4CAF50" />
+                            <circle cx="170" cy="70" r="10" fill="white" />
+                            <circle cx="173" cy="70" r="5" fill="black" />
+                            <path d="M190,90 L220,90 L220,100 L190,100 Z" fill="white" /> <!-- Teeth -->
+                            <path d="M30,130 L20,150 L30,170 L40,150 L30,130" fill="#4CAF50" /> <!-- Left Leg -->
+                            <path d="M100,130 L90,150 L100,170 L110,150 L100,130" fill="#4CAF50" /> <!-- Right Leg -->
+                        </g>
+                    </svg>
+                </div>
+                
+                <!-- Stick Figure Barry -->
+                <div id="barry" style="position: absolute; right: -100px; top: 50%; transform: translateY(-50%); width: 100px; height: 120px;">
+                    <svg width="100" height="120" viewBox="0 0 100 120">
+                        <g id="stick-figure">
+                            <circle cx="50" cy="20" r="15" fill="#FFF" />
+                            <line x1="50" y1="35" x2="50" y2="80" stroke="#FFF" stroke-width="4" />
+                            <line x1="50" y1="50" x2="20" y2="60" stroke="#FFF" stroke-width="4" />
+                            <line x1="50" y1="50" x2="80" y2="60" stroke="#FFF" stroke-width="4" />
+                            <line x1="50" y1="80" x2="30" y2="110" stroke="#FFF" stroke-width="4" />
+                            <line x1="50" y1="80" x2="70" y2="110" stroke="#FFF" stroke-width="4" />
+                        </g>
+                    </svg>
+                </div>
+                
+                <!-- Blood Splatter Effect (hidden initially) -->
+                <div id="blood-splatter" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none;">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="5" fill="#FF0000" />
+                        <circle cx="110" cy="90" r="8" fill="#FF0000" />
+                        <circle cx="90" cy="110" r="10" fill="#FF0000" />
+                        <circle cx="120" cy="100" r="7" fill="#FF0000" />
+                        <circle cx="100" cy="120" r="9" fill="#FF0000" />
+                        <circle cx="80" cy="100" r="6" fill="#FF0000" />
+                        <circle cx="100" cy="80" r="8" fill="#FF0000" />
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Message Text with Animation -->
+            <div id="message-text" style="font-family: 'Impact', sans-serif; font-size: 48px; color: #FF0000; margin-top: 20px; opacity: 0; transform: scale(0.5); transition: all 1s ease;">BARRY STANCHIO SUCKS!</div>
+            
+            <button id="close-easter-egg" style="margin-top: 30px; padding: 10px 20px; background-color: #F44336; color: white; border: none; border-radius: 4px; font-size: 18px; cursor: pointer;">CLOSE</button>
+        </div>
+        <div class="search-header">
+            <div class="header-content">
+                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="Google Logo" class="header-logo">
+                <div class="header-search-container">
+                    <input type="text" class="header-search" id="results-search-box" value="Barry Stanchio">
+                </div>
+            </div>
+        </div>
+        
+        <div class="search-results">
+            <p>About 14,700 results (0.62 seconds)</p>
+            
+            <div class="result">
+                <div class="result-url">https://trellis.law/doc/25550033/memorandum-law-in-support-motion-003</div>
+                <h3 class="result-title">
+                    <a href="https://trellis.law/doc/25550033/memorandum-law-in-support-motion-003" target="_blank">Motion for Child Support in Silvia Azucar v. Barry Stanchio</a>
+                </h3>
+                <div class="result-description">
+                    On January 6, 2014, Silvia Azucar (herein after "Ms. Azucar" and/or "Plaintiff"), a 39-year old woman, attended Barry Stanchio's (herein after "Defendent") daughter's sweet sixteen birthday party...Defendent, forcibly and without consent, placed his hand up Ms. Azucar's dress, grabbing her in intimate area and attempting to digitally penetrate her. 
+                </div>
+            </div>
+            
+            <div class="result">
+                <div class="result-url">https://trellis.law/doc/25549933/affidavit-affirmation-in-support-motion-001</div>
+                <h3 class="result-title">
+                    <a href="https://trellis.law/doc/25549933/affidavit-affirmation-in-support-motion-001" target="_blank">Motion-Secondary: AZUCAR, SILVIA v. STANCHIO, BARRY</a>
+                </h3>
+                <div class="result-description">
+                    The within action was brought on behalf of Plaintiff, against Defendent BARRY STANCHIO, and involes a claim for a Battery, Assault, Intentional Infliction of Emotional Distress, and Negligent Infliction of Emotional Distress...
+                </div>
+            </div>
+            
+            <div class="result">
+                <div class="result-url">https://twitter.com/barrystanchio</div>
+                <h3 class="result-title">
+                    <a href="https://twitter.com/barrystanchio" target="_blank">Barry Stanchio (@barrystanchio) | Twitter</a>
+                </h3>
+                <div class="result-description">
+                    The latest Tweets from Barry Stanchio (@barrystanchio). Official Twitter account. Follow for updates on projects and events.
+                </div>
+            </div>
+            
+            <div class="result">
+                <div class="result-url">https://www.example.org/articles/by/barry-stanchio</div>
+                <h3 class="result-title">
+                    <a href="https://www.example.org/articles/by/barry-stanchio" target="_blank">Articles by Barry Stanchio - Example Publications</a>
+                </h3>
+                <div class="result-description">
+                    Read the latest articles, research papers, and opinion pieces written by Barry Stanchio. Covering topics in his area of expertise.
+                </div>
+            </div>
+            
+            <div class="result">
+                <div class="result-url">https://www.example.net/events/speakers/barry-stanchio</div>
+                <h3 class="result-title">
+                    <a href="https://www.example.net/events/speakers/barry-stanchio" target="_blank">Barry Stanchio - Featured Speaker | Example Conference</a>
+                </h3>
+                <div class="result-description">
+                    Barry Stanchio will be a featured speaker at this year's conference. View his session details and speaker biography.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cursor = document.getElementById('cursor');
+            const searchBtn = document.getElementById('search-btn');
+            const searchPage = document.getElementById('search-page');
+            const resultsPage = document.getElementById('results-page');
+            const loadingText = document.getElementById('loading-text');
+            const easterEgg = document.getElementById('easter-egg');
+            const closeEasterEgg = document.getElementById('close-easter-egg');
+            const resultsSearchBox = document.getElementById('results-search-box');
+            const trex = document.getElementById('trex');
+            const barry = document.getElementById('barry');
+            const bloodSplatter = document.getElementById('blood-splatter');
+            const messageText = document.getElementById('message-text');
+            
+            // Add event listener for the Enter key in the results search box
+            resultsSearchBox.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    easterEgg.style.display = 'block';
+                    
+                    // Animation sequence
+                    setTimeout(function() {
+                        // Animate T-Rex
+                        trex.style.transition = 'left 3s ease-in-out';
+                        trex.style.left = '30%';
+                        
+                        // Animate Barry
+                        barry.style.transition = 'right 2s ease-in-out';
+                        barry.style.right = '40%';
+                        
+                        // Collision and blood splatter
+                        setTimeout(function() {
+                            bloodSplatter.style.display = 'block';
+                            bloodSplatter.style.left = '45%';
+                            barry.style.display = 'none';
+                            
+                            // Show message with animation
+                            setTimeout(function() {
+                                messageText.style.opacity = '1';
+                                messageText.style.transform = 'scale(1)';
+                            }, 500);
+                        }, 2000);
+                    }, 500);
+                }
+            });
+            
+            // Close easter egg when button is clicked
+            closeEasterEgg.addEventListener('click', function() {
+                resetEasterEgg();
+            });
+            
+            // Close easter egg when Escape key is pressed
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && easterEgg.style.display === 'block') {
+                    resetEasterEgg();
+                }
+            });
+            
+            // Function to reset the easter egg
+            function resetEasterEgg() {
+                easterEgg.style.display = 'none';
+                // Reset animations
+                setTimeout(function() {
+                    trex.style.transition = 'none';
+                    trex.style.left = '-300px';
+                    barry.style.transition = 'none';
+                    barry.style.right = '-100px';
+                    barry.style.display = 'block';
+                    bloodSplatter.style.display = 'none';
+                    messageText.style.opacity = '0';
+                    messageText.style.transform = 'scale(0.5)';
+                }, 100);
+            }
+            
+            // Start the animation sequence after a short delay
+            setTimeout(function() {
+                // Show the cursor and start typing animation
+                cursor.style.opacity = '1';
+                
+                // Animate the cursor to move across input field
+                cursor.style.animation = 'cursorAnimation 2s forwards';
+                
+                // After cursor finishes, animate button click
+                setTimeout(function() {
+                    searchBtn.style.animation = 'buttonAnimation 0.5s forwards';
+                    
+                    // Show loading text
+                    setTimeout(function() {
+                        loadingText.style.display = 'block';
+                        
+                        // After "searching", show results page
+                        setTimeout(function() {
+                            searchPage.style.display = 'none';
+                            resultsPage.style.display = 'block';
+                        }, 2000);
+                    }, 500);
+                }, 2000);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
