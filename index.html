@@ -387,36 +387,81 @@
             const bloodSplatter = document.getElementById('blood-splatter');
             const messageText = document.getElementById('message-text');
             
+            // Function to close the mobile keyboard
+            function closeKeyboard() {
+                // Blur any active element to dismiss the keyboard
+                if (document.activeElement instanceof HTMLElement) {
+                    document.activeElement.blur();
+                }
+                
+                // For iOS devices, create a temporary input to focus and blur
+                const tempInput = document.createElement('input');
+                tempInput.style.position = 'absolute';
+                tempInput.style.opacity = '0';
+                tempInput.style.height = '0';
+                tempInput.style.width = '0';
+                document.body.appendChild(tempInput);
+                tempInput.focus();
+                tempInput.blur();
+                document.body.removeChild(tempInput);
+                
+                // For Android, we can try changing the display style temporarily
+                document.documentElement.style.height = '100%';
+                document.documentElement.style.overflow = 'hidden';
+                setTimeout(function() {
+                    document.documentElement.style.height = '';
+                    document.documentElement.style.overflow = '';
+                }, 100);
+            }
+            
             // Add event listener for the Enter key in the results search box
             resultsSearchBox.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    easterEgg.style.display = 'block';
                     
-                    // Animation sequence
+                    // Close the keyboard first before showing the easter egg
+                    closeKeyboard();
+                    
+                    // Show the easter egg with a slight delay to ensure keyboard is closed
                     setTimeout(function() {
-                        // Animate T-Rex
-                        trex.style.transition = 'left 3s ease-in-out';
-                        trex.style.left = '30%';
+                        easterEgg.style.display = 'block';
                         
-                        // Animate Barry
-                        barry.style.transition = 'right 2s ease-in-out';
-                        barry.style.right = '40%';
-                        
-                        // Collision and blood splatter
+                        // Animation sequence
                         setTimeout(function() {
-                            bloodSplatter.style.display = 'block';
-                            bloodSplatter.style.left = '45%';
-                            barry.style.display = 'none';
+                            // Animate T-Rex
+                            trex.style.transition = 'left 3s ease-in-out';
+                            trex.style.left = '30%';
                             
-                            // Show message with animation
+                            // Animate Barry
+                            barry.style.transition = 'right 2s ease-in-out';
+                            barry.style.right = '40%';
+                            
+                            // Collision and blood splatter
                             setTimeout(function() {
-                                messageText.style.opacity = '1';
-                                messageText.style.transform = 'scale(1)';
-                            }, 500);
-                        }, 2000);
-                    }, 500);
+                                bloodSplatter.style.display = 'block';
+                                bloodSplatter.style.left = '45%';
+                                barry.style.display = 'none';
+                                
+                                // Show message with animation
+                                setTimeout(function() {
+                                    messageText.style.opacity = '1';
+                                    messageText.style.transform = 'scale(1)';
+                                }, 500);
+                            }, 2000);
+                        }, 500);
+                    }, 100);
                 }
+            });
+            
+            // Also add click handler for search box focus to prevent keyboard issues
+            resultsSearchBox.addEventListener('focus', function() {
+                // Add a class to indicate keyboard is active if needed
+                document.body.classList.add('keyboard-active');
+            });
+            
+            resultsSearchBox.addEventListener('blur', function() {
+                // Remove keyboard active class when blurred
+                document.body.classList.remove('keyboard-active');
             });
             
             // Close easter egg when button is clicked
