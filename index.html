@@ -55,28 +55,11 @@
             font-size: 16px;
             outline: none;
             box-shadow: 0 1px 3px rgba(32, 33, 36, 0.1);
-            display: flex;
-            align-items: center;
         }
         
-        #typed-text {
-            flex-grow: 1;
-            height: 100%;
-            line-height: 46px;
-        }
-        
-        .blink-cursor {
-            display: inline-block;
-            width: 2px;
-            height: 24px;
-            background-color: black;
-            margin-left: 2px;
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
+        .search-box:hover, .search-box:focus {
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+            border-color: rgba(223, 225, 229, 0);
         }
         
         .search-buttons {
@@ -187,6 +170,22 @@
             line-height: 1.58;
         }
         
+        /* Blinking cursor styling */
+        .blink-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 24px;
+            background-color: black;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+        
         .loading-text {
             text-align: center;
             margin-top: 20px;
@@ -233,68 +232,6 @@
                 font-size: 14px;
             }
         }
-
-        /* Easter egg styles */
-        #easter-egg {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            z-index: 1000;
-            text-align: center;
-            padding-top: 50px;
-            overflow: hidden;
-        }
-        
-        #trex {
-            position: absolute;
-            left: -300px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 300px;
-            height: 180px;
-        }
-        
-        #barry {
-            position: absolute;
-            right: -100px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 100px;
-            height: 120px;
-        }
-        
-        #blood-splatter {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-        }
-        
-        #message-text {
-            font-family: 'Impact', sans-serif;
-            font-size: 48px;
-            color: #FF0000;
-            margin-top: 20px;
-            opacity: 0;
-            transform: scale(0.5);
-            transition: all 1s ease;
-        }
-        
-        #close-easter-egg {
-            margin-top: 30px;
-            padding: 10px 20px;
-            background-color: #F44336;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 18px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -303,10 +240,10 @@
             <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="Google Logo">
         </div>
         <div class="search-container">
-            <div class="search-box">
-                <div id="typed-text"></div>
-                <div class="blink-cursor" id="cursor"></div>
-            </div>
+            <span id="typed-text-container">
+                <span id="typed-text"></span><span id="cursor" class="blink-cursor"></span>
+            </span>
+            <input type="text" class="search-box" id="search-box" style="opacity: 0; position: absolute;">
         </div>
         <div class="search-buttons">
             <button class="search-button" id="search-btn">Google Search</button>
@@ -316,10 +253,10 @@
     </div>
     
     <div class="results-page" id="results-page">
-        <div id="easter-egg">
+        <div id="easter-egg" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 1000; text-align: center; padding-top: 50px; overflow: hidden;">
             <div class="animation-container" style="width: 100%; height: 60%; position: relative;">
                 <!-- T-Rex Animation -->
-                <div id="trex">
+                <div id="trex" style="position: absolute; left: -300px; top: 50%; transform: translateY(-50%); width: 300px; height: 180px;">
                     <svg width="300" height="180" viewBox="0 0 300 180">
                         <g id="trex-body">
                             <path d="M50,80 L120,80 L150,50 L190,50 L200,60 L200,90 L220,100 L220,120 L200,130 L180,130 L170,120 L150,120 L140,130 L130,130 L120,120 L110,120 L100,130 L60,130 L50,120 L40,120 L30,130 L20,130 L10,120 L10,100 L30,90 L30,90 L40,80" fill="#4CAF50" />
@@ -333,7 +270,7 @@
                 </div>
                 
                 <!-- Stick Figure Barry -->
-                <div id="barry">
+                <div id="barry" style="position: absolute; right: -100px; top: 50%; transform: translateY(-50%); width: 100px; height: 120px;">
                     <svg width="100" height="120" viewBox="0 0 100 120">
                         <g id="stick-figure">
                             <circle cx="50" cy="20" r="15" fill="#FFF" />
@@ -347,7 +284,7 @@
                 </div>
                 
                 <!-- Blood Splatter Effect (hidden initially) -->
-                <div id="blood-splatter">
+                <div id="blood-splatter" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none;">
                     <svg width="200" height="200" viewBox="0 0 200 200">
                         <circle cx="100" cy="100" r="5" fill="#FF0000" />
                         <circle cx="110" cy="90" r="8" fill="#FF0000" />
@@ -361,9 +298,9 @@
             </div>
             
             <!-- Message Text with Animation -->
-            <div id="message-text">BARRY STANCHIO SUCKS!</div>
+            <div id="message-text" style="font-family: 'Impact', sans-serif; font-size: 48px; color: #FF0000; margin-top: 20px; opacity: 0; transform: scale(0.5); transition: all 1s ease;">BARRY STANCHIO SUCKS!</div>
             
-            <button id="close-easter-egg">CLOSE</button>
+            <button id="close-easter-egg" style="margin-top: 30px; padding: 10px 20px; background-color: #F44336; color: white; border: none; border-radius: 4px; font-size: 18px; cursor: pointer;">CLOSE</button>
         </div>
         <div class="search-header">
             <div class="header-content">
@@ -380,27 +317,27 @@
             <div class="result">
                 <div class="result-url">https://trellis.law/doc/25550033/memorandum-law-in-support-motion-003</div>
                 <h3 class="result-title">
-                    <a href="#" id="result1">Motion for Child Support in Silvia Azucar v. Barry Stanchio</a>
+                    <a href="https://trellis.law/doc/25550033/memorandum-law-in-support-motion-003" target="_blank">Motion for Child Support in Silvia Azucar v. Barry Stanchio</a>
                 </h3>
                 <div class="result-description">
-                    Legal case involving Barry Stanchio from 2014. Court documents and case details available.
+                    On January 6, 2014, Silvia Azucar (herein after "Ms. Azucar" and/or "Plaintiff"), a 39-year old woman, attended Barry Stanchio's (herein after "Defendent") daughter's sweet sixteen birthday party...Defendent, forcibly and without consent, placed his hand up Ms. Azucar's dress, grabbing her in intimate area and attempting to digitally penetrate her. 
                 </div>
             </div>
             
             <div class="result">
                 <div class="result-url">https://trellis.law/doc/25549933/affidavit-affirmation-in-support-motion-001</div>
                 <h3 class="result-title">
-                    <a href="#" id="result2">Motion-Secondary: AZUCAR, SILVIA v. STANCHIO, BARRY</a>
+                    <a href="https://trellis.law/doc/25549933/affidavit-affirmation-in-support-motion-001" target="_blank">Motion-Secondary: AZUCAR, SILVIA v. STANCHIO, BARRY</a>
                 </h3>
                 <div class="result-description">
-                    Additional legal documents related to case between Silvia Azucar and Barry Stanchio, including claims filed.
+                    The within action was brought on behalf of Plaintiff, against Defendent BARRY STANCHIO, and involes a claim for a Battery, Assault, Intentional Infliction of Emotional Distress, and Negligent Infliction of Emotional Distress...
                 </div>
             </div>
             
             <div class="result">
                 <div class="result-url">https://twitter.com/barrystanchio</div>
                 <h3 class="result-title">
-                    <a href="#" id="result3">Barry Stanchio (@barrystanchio) | Twitter</a>
+                    <a href="https://twitter.com/barrystanchio" target="_blank">Barry Stanchio (@barrystanchio) | Twitter</a>
                 </h3>
                 <div class="result-description">
                     The latest Tweets from Barry Stanchio (@barrystanchio). Official Twitter account. Follow for updates on projects and events.
@@ -410,7 +347,7 @@
             <div class="result">
                 <div class="result-url">https://www.example.org/articles/by/barry-stanchio</div>
                 <h3 class="result-title">
-                    <a href="#" id="result4">Articles by Barry Stanchio - Example Publications</a>
+                    <a href="https://www.example.org/articles/by/barry-stanchio" target="_blank">Articles by Barry Stanchio - Example Publications</a>
                 </h3>
                 <div class="result-description">
                     Read the latest articles, research papers, and opinion pieces written by Barry Stanchio. Covering topics in his area of expertise.
@@ -420,7 +357,7 @@
             <div class="result">
                 <div class="result-url">https://www.example.net/events/speakers/barry-stanchio</div>
                 <h3 class="result-title">
-                    <a href="#" id="result5">Barry Stanchio - Featured Speaker | Example Conference</a>
+                    <a href="https://www.example.net/events/speakers/barry-stanchio" target="_blank">Barry Stanchio - Featured Speaker | Example Conference</a>
                 </h3>
                 <div class="result-description">
                     Barry Stanchio will be a featured speaker at this year's conference. View his session details and speaker biography.
@@ -432,6 +369,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const typedText = document.getElementById('typed-text');
+            const cursor = document.getElementById('cursor');
+            const searchBox = document.getElementById('search-box');
+            const typedTextContainer = document.getElementById('typed-text-container');
             const searchBtn = document.getElementById('search-btn');
             const searchPage = document.getElementById('search-page');
             const resultsPage = document.getElementById('results-page');
@@ -444,50 +384,136 @@
             const bloodSplatter = document.getElementById('blood-splatter');
             const messageText = document.getElementById('message-text');
             
-            // Result links trigger easter egg
-            const resultLinks = document.querySelectorAll('.result-title a');
-            resultLinks.forEach(link => {
-                link.addEventListener('click', function(event) {
+            // Style the typed text container to look like the search box
+            typedTextContainer.style.display = 'block';
+            typedTextContainer.style.width = '100%';
+            typedTextContainer.style.height = '46px';
+            typedTextContainer.style.border = '1px solid #dfe1e5';
+            typedTextContainer.style.borderRadius = '24px';
+            typedTextContainer.style.padding = '0 20px';
+            typedTextContainer.style.fontSize = '16px';
+            typedTextContainer.style.lineHeight = '46px';
+            typedTextContainer.style.backgroundColor = 'white';
+            typedTextContainer.style.boxShadow = '0 1px 3px rgba(32, 33, 36, 0.1)';
+            
+            // Function to close the mobile keyboard
+            function closeKeyboard() {
+                // Blur any active element to dismiss the keyboard
+                if (document.activeElement instanceof HTMLElement) {
+                    document.activeElement.blur();
+                }
+                
+                // For iOS devices, create a temporary input to focus and blur
+                const tempInput = document.createElement('input');
+                tempInput.style.position = 'absolute';
+                tempInput.style.opacity = '0';
+                tempInput.style.height = '0';
+                tempInput.style.width = '0';
+                document.body.appendChild(tempInput);
+                tempInput.focus();
+                tempInput.blur();
+                document.body.removeChild(tempInput);
+                
+                // For Android, we can try changing the display style temporarily
+                document.documentElement.style.height = '100%';
+                document.documentElement.style.overflow = 'hidden';
+                setTimeout(function() {
+                    document.documentElement.style.height = '';
+                    document.documentElement.style.overflow = '';
+                }, 100);
+            }
+            
+            // Simpler typing animation that doesn't rely on cursor positioning
+            function typeWriter(text, i) {
+                if (i < text.length) {
+                    typedText.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(function() { typeWriter(text, i); }, 100);
+                } else {
+                    // After typing is complete, trigger button animation
+                    setTimeout(function() {
+                        searchBtn.style.animation = 'buttonAnimation 0.5s forwards';
+                        
+                        // Show loading text
+                        setTimeout(function() {
+                            loadingText.style.display = 'block';
+                            
+                            // After "searching", show results page
+                            setTimeout(function() {
+                                searchPage.style.display = 'none';
+                                resultsPage.style.display = 'block';
+                            }, 2000);
+                        }, 500);
+                    }, 1000);
+                }
+            }
+            
+            // Add event listener for the Enter key in the results search box
+            resultsSearchBox.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
                     event.preventDefault();
-                    showEasterEgg();
-                });
+                    
+                    // Close the keyboard first before showing the easter egg
+                    closeKeyboard();
+                    
+                    // Show the easter egg with a slight delay to ensure keyboard is closed
+                    setTimeout(function() {
+                        easterEgg.style.display = 'block';
+                        
+                        // Animation sequence
+                        setTimeout(function() {
+                            // Animate T-Rex
+                            trex.style.transition = 'left 3s ease-in-out';
+                            trex.style.left = '30%';
+                            
+                            // Animate Barry
+                            barry.style.transition = 'right 2s ease-in-out';
+                            barry.style.right = '40%';
+                            
+                            // Collision and blood splatter
+                            setTimeout(function() {
+                                bloodSplatter.style.display = 'block';
+                                bloodSplatter.style.left = '45%';
+                                barry.style.display = 'none';
+                                
+                                // Show message with animation
+                                setTimeout(function() {
+                                    messageText.style.opacity = '1';
+                                    messageText.style.transform = 'scale(1)';
+                                }, 500);
+                            }, 2000);
+                        }, 500);
+                    }, 100);
+                }
             });
             
-            // Function to show easter egg
-            function showEasterEgg() {
-                easterEgg.style.display = 'block';
-                
-                // Animate T-Rex
-                setTimeout(function() {
-                    trex.style.transition = 'left 3s ease-in-out';
-                    trex.style.left = '30%';
-                    
-                    // Animate Barry
-                    barry.style.transition = 'right 2s ease-in-out';
-                    barry.style.right = '40%';
-                    
-                    // Collision and blood splatter
-                    setTimeout(function() {
-                        bloodSplatter.style.display = 'block';
-                        barry.style.display = 'none';
-                        
-                        // Show message
-                        setTimeout(function() {
-                            messageText.style.opacity = '1';
-                            messageText.style.transform = 'scale(1)';
-                        }, 500);
-                    }, 2000);
-                }, 500);
-            }
+            // Also add click handler for search box focus to prevent keyboard issues
+            resultsSearchBox.addEventListener('focus', function() {
+                // Add a class to indicate keyboard is active if needed
+                document.body.classList.add('keyboard-active');
+            });
+            
+            resultsSearchBox.addEventListener('blur', function() {
+                // Remove keyboard active class when blurred
+                document.body.classList.remove('keyboard-active');
+            });
             
             // Close easter egg when button is clicked
             closeEasterEgg.addEventListener('click', function() {
                 resetEasterEgg();
             });
             
+            // Close easter egg when Escape key is pressed
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && easterEgg.style.display === 'block') {
+                    resetEasterEgg();
+                }
+            });
+            
             // Function to reset the easter egg
             function resetEasterEgg() {
                 easterEgg.style.display = 'none';
+                // Reset animations
                 setTimeout(function() {
                     trex.style.transition = 'none';
                     trex.style.left = '-300px';
@@ -500,41 +526,11 @@
                 }, 100);
             }
             
-            // Simple typing animation function
-            function typeText(text, i = 0) {
-                if (i < text.length) {
-                    typedText.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(function() { typeText(text, i); }, 100);
-                } else {
-                    // Animation sequence after typing
-                    setTimeout(function() {
-                        searchBtn.style.animation = 'buttonAnimation 0.5s forwards';
-                        
-                        setTimeout(function() {
-                            loadingText.style.display = 'block';
-                            
-                            setTimeout(function() {
-                                searchPage.style.display = 'none';
-                                resultsPage.style.display = 'block';
-                            }, 2000);
-                        }, 500);
-                    }, 1000);
-                }
-            }
-            
-            // Start typing animation after page loads
+            // Start the animation sequence after a short delay
             setTimeout(function() {
-                typeText("Barry Stanchio");
+                // Start typing after a short delay
+                typeWriter("Barry Stanchio", 0);
             }, 1000);
-            
-            // Add enter key event to results search box
-            resultsSearchBox.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    showEasterEgg();
-                }
-            });
         });
     </script>
 </body>
