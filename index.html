@@ -170,16 +170,20 @@
             line-height: 1.58;
         }
         
-        .cursor {
+        /* Blinking cursor styling */
+        .blink-cursor {
             display: inline-block;
             width: 2px;
             height: 24px;
-            background-color: #000;
-            position: absolute;
-            top: 11px;
-            left: 21px;
-            opacity: 0;
-            z-index: 10;
+            background-color: black;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
         }
         
         .loading-text {
@@ -191,18 +195,6 @@
         
         a {
             text-decoration: none;
-        }
-        
-        @keyframes cursorAnimation {
-            0% { left: 21px; opacity: 1; }
-            20% { opacity: 1; }
-            30% { left: 160px; opacity: 1; }
-            40% { left: 160px; opacity: 1; }
-            45% { opacity: 0; }
-            50% { opacity: 1; }
-            55% { opacity: 0; }
-            60% { opacity: 1; }
-            100% { opacity: 0; }
         }
         
         @keyframes buttonAnimation {
@@ -248,8 +240,10 @@
             <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="Google Logo">
         </div>
         <div class="search-container">
-            <input type="text" class="search-box" value="Barry Stanchio">
-            <div class="cursor" id="cursor"></div>
+            <span id="typed-text-container">
+                <span id="typed-text"></span><span id="cursor" class="blink-cursor"></span>
+            </span>
+            <input type="text" class="search-box" id="search-box" style="opacity: 0; position: absolute;">
         </div>
         <div class="search-buttons">
             <button class="search-button" id="search-btn">Google Search</button>
@@ -374,7 +368,10 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const typedText = document.getElementById('typed-text');
             const cursor = document.getElementById('cursor');
+            const searchBox = document.getElementById('search-box');
+            const typedTextContainer = document.getElementById('typed-text-container');
             const searchBtn = document.getElementById('search-btn');
             const searchPage = document.getElementById('search-page');
             const resultsPage = document.getElementById('results-page');
@@ -386,6 +383,18 @@
             const barry = document.getElementById('barry');
             const bloodSplatter = document.getElementById('blood-splatter');
             const messageText = document.getElementById('message-text');
+            
+            // Style the typed text container to look like the search box
+            typedTextContainer.style.display = 'block';
+            typedTextContainer.style.width = '100%';
+            typedTextContainer.style.height = '46px';
+            typedTextContainer.style.border = '1px solid #dfe1e5';
+            typedTextContainer.style.borderRadius = '24px';
+            typedTextContainer.style.padding = '0 20px';
+            typedTextContainer.style.fontSize = '16px';
+            typedTextContainer.style.lineHeight = '46px';
+            typedTextContainer.style.backgroundColor = 'white';
+            typedTextContainer.style.boxShadow = '0 1px 3px rgba(32, 33, 36, 0.1)';
             
             // Function to close the mobile keyboard
             function closeKeyboard() {
@@ -414,6 +423,31 @@
                 }, 100);
             }
             
+            // Simpler typing animation that doesn't rely on cursor positioning
+            function typeWriter(text, i) {
+                if (i < text.length) {
+                    typedText.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(function() { typeWriter(text, i); }, 100);
+                } else {
+                    // After typing is complete, trigger button animation
+                    setTimeout(function() {
+                        searchBtn.style.animation = 'buttonAnimation 0.5s forwards';
+                        
+                        // Show loading text
+                        setTimeout(function() {
+                            loadingText.style.display = 'block';
+                            
+                            // After "searching", show results page
+                            setTimeout(function() {
+                                searchPage.style.display = 'none';
+                                resultsPage.style.display = 'block';
+                            }, 2000);
+                        }, 500);
+                    }, 1000);
+                }
+            }
+            
             // Add event listener for the Enter key in the results search box
             resultsSearchBox.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
@@ -435,88 +469,5 @@
                             // Animate Barry
                             barry.style.transition = 'right 2s ease-in-out';
                             barry.style.right = '40%';
-                            
-                            // Collision and blood splatter
-                            setTimeout(function() {
-                                bloodSplatter.style.display = 'block';
-                                bloodSplatter.style.left = '45%';
-                                barry.style.display = 'none';
-                                
-                                // Show message with animation
-                                setTimeout(function() {
-                                    messageText.style.opacity = '1';
-                                    messageText.style.transform = 'scale(1)';
-                                }, 500);
-                            }, 2000);
-                        }, 500);
-                    }, 100);
-                }
-            });
-            
-            // Also add click handler for search box focus to prevent keyboard issues
-            resultsSearchBox.addEventListener('focus', function() {
-                // Add a class to indicate keyboard is active if needed
-                document.body.classList.add('keyboard-active');
-            });
-            
-            resultsSearchBox.addEventListener('blur', function() {
-                // Remove keyboard active class when blurred
-                document.body.classList.remove('keyboard-active');
-            });
-            
-            // Close easter egg when button is clicked
-            closeEasterEgg.addEventListener('click', function() {
-                resetEasterEgg();
-            });
-            
-            // Close easter egg when Escape key is pressed
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape' && easterEgg.style.display === 'block') {
-                    resetEasterEgg();
-                }
-            });
-            
-            // Function to reset the easter egg
-            function resetEasterEgg() {
-                easterEgg.style.display = 'none';
-                // Reset animations
-                setTimeout(function() {
-                    trex.style.transition = 'none';
-                    trex.style.left = '-300px';
-                    barry.style.transition = 'none';
-                    barry.style.right = '-100px';
-                    barry.style.display = 'block';
-                    bloodSplatter.style.display = 'none';
-                    messageText.style.opacity = '0';
-                    messageText.style.transform = 'scale(0.5)';
-                }, 100);
-            }
-            
-            // Start the animation sequence after a short delay
-            setTimeout(function() {
-                // Show the cursor and start typing animation
-                cursor.style.opacity = '1';
-                
-                // Animate the cursor to move across input field
-                cursor.style.animation = 'cursorAnimation 2s forwards';
-                
-                // After cursor finishes, animate button click
-                setTimeout(function() {
-                    searchBtn.style.animation = 'buttonAnimation 0.5s forwards';
-                    
-                    // Show loading text
-                    setTimeout(function() {
-                        loadingText.style.display = 'block';
-                        
-                        // After "searching", show results page
-                        setTimeout(function() {
-                            searchPage.style.display = 'none';
-                            resultsPage.style.display = 'block';
-                        }, 2000);
-                    }, 500);
-                }, 2000);
-            }, 1000);
-        });
-    </script>
-</body>
-</html>
+
+                                   
