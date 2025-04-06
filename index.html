@@ -469,5 +469,69 @@
                             // Animate Barry
                             barry.style.transition = 'right 2s ease-in-out';
                             barry.style.right = '40%';
-
-                                   
+                            
+                            // Collision and blood splatter
+                            setTimeout(function() {
+                                bloodSplatter.style.display = 'block';
+                                bloodSplatter.style.left = '45%';
+                                barry.style.display = 'none';
+                                
+                                // Show message with animation
+                                setTimeout(function() {
+                                    messageText.style.opacity = '1';
+                                    messageText.style.transform = 'scale(1)';
+                                }, 500);
+                            }, 2000);
+                        }, 500);
+                    }, 100);
+                }
+            });
+            
+            // Also add click handler for search box focus to prevent keyboard issues
+            resultsSearchBox.addEventListener('focus', function() {
+                // Add a class to indicate keyboard is active if needed
+                document.body.classList.add('keyboard-active');
+            });
+            
+            resultsSearchBox.addEventListener('blur', function() {
+                // Remove keyboard active class when blurred
+                document.body.classList.remove('keyboard-active');
+            });
+            
+            // Close easter egg when button is clicked
+            closeEasterEgg.addEventListener('click', function() {
+                resetEasterEgg();
+            });
+            
+            // Close easter egg when Escape key is pressed
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && easterEgg.style.display === 'block') {
+                    resetEasterEgg();
+                }
+            });
+            
+            // Function to reset the easter egg
+            function resetEasterEgg() {
+                easterEgg.style.display = 'none';
+                // Reset animations
+                setTimeout(function() {
+                    trex.style.transition = 'none';
+                    trex.style.left = '-300px';
+                    barry.style.transition = 'none';
+                    barry.style.right = '-100px';
+                    barry.style.display = 'block';
+                    bloodSplatter.style.display = 'none';
+                    messageText.style.opacity = '0';
+                    messageText.style.transform = 'scale(0.5)';
+                }, 100);
+            }
+            
+            // Start the animation sequence after a short delay
+            setTimeout(function() {
+                // Start typing after a short delay
+                typeWriter("Barry Stanchio", 0);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
