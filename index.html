@@ -204,35 +204,6 @@
             90% { background-color: #f8f9fa; }
         }
         
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .container {
-                padding-top: 80px;
-            }
-            
-            .logo img {
-                max-width: 180px;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .header-logo {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            
-            .header-search-container {
-                width: 90%;
-            }
-            
-            .search-box, .header-search {
-                font-size: 14px;
-            }
-        }
-        
         /* Tetris Game Styles */
         #tetris-container {
             display: none;
@@ -366,8 +337,44 @@
         
         /* Media query for mobile devices */
         @media (max-width: 768px) {
+            .container {
+                padding-top: 80px;
+            }
+            
+            .logo img {
+                max-width: 180px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .header-logo {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .header-search-container {
+                width: 90%;
+            }
+            
+            .search-box, .header-search {
+                font-size: 14px;
+            }
+            
+            #tetris-container {
+                padding: 0 10px;
+                overflow-y: auto;
+                justify-content: flex-start;
+                padding-top: 50px;
+            }
+            
             #tetris-wrapper {
                 flex-direction: column;
+                transform: scale(0.9);
+                transform-origin: top center;
+                margin-top: 10px;
             }
             
             #tetris-sidebar {
@@ -385,15 +392,11 @@
             
             #tetris-mobile-controls {
                 display: block;
+                margin-bottom: 30px;
             }
             
             #tetris-controls {
                 display: none;
-            }
-            
-            #tetris-canvas {
-                width: 240px;
-                height: 400px;
             }
         }
     </style>
@@ -781,11 +784,11 @@
             const mobileRotate = document.getElementById('tetris-rotate');
             const mobileDrop = document.getElementById('tetris-drop');
             
-            // Set up game constants
-            const COLS = 10;
-            const ROWS = 20;
-            const BLOCK_SIZE = Math.floor(canvas.width / COLS);
-            const NEXT_BLOCK_SIZE = Math.floor(nextPieceCanvas.width / 4);
+            // Set up game constants - these will be adjusted based on screen size
+            let COLS = 10;
+            let ROWS = 20;
+            let BLOCK_SIZE = 30; // Default, will be recalculated
+            let NEXT_BLOCK_SIZE = 20; // Default, will be recalculated
             
             // Colors for tetrominos
             const COLORS = [
@@ -869,15 +872,25 @@
             // Function to create a random piece
             function createPiece() {
                 const index = Math.floor(Math.random() * 7) + 1;
-                const piece = {
-                    shape: SHAPES[index],
-                    color: COLORS[index],
-                    pos: {
-                        x: Math.floor(COLS / 2) - Math.floor(SHAPES[index][0].length / 2),
-                        y: 0
-                    }
+                const shape = SHAPES[index];
+                
+                // Calculate starting position centered at the top
+                const pos = {
+                    x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2),
+                    y: 0
                 };
-                return piece;
+                
+                // If we're on mobile, adjust the y position for certain pieces to ensure they're visible
+                if (window.innerWidth <= 768 && (index === 1 || index === 3 || index === 4)) {
+                    // For I, J, L pieces, start them a bit lower so they're fully visible
+                    pos.y = -1;
+                }
+                
+                return {
+                    shape: shape,
+                    color: COLORS[index],
+                    pos: pos
+                };
             }
             
             // Function to draw a block
@@ -906,13 +919,16 @@
                 piece.shape.forEach((row, y) => {
                     row.forEach((value, x) => {
                         if (value !== 0) {
-                            drawBlock(
-                                ctx,
-                                x + piece.pos.x,
-                                y + piece.pos.y,
-                                piece.color,
-                                blockSize
-                            );
+                            // Only draw if the piece is on the board
+                            if (piece.pos.y + y >= 0) {
+                                drawBlock(
+                                    ctx,
+                                    x + piece.pos.x,
+                                    y + piece.pos.y,
+                                    piece.color,
+                                    blockSize
+                                );
+                            }
                         }
                     });
                 });
@@ -1036,12 +1052,12 @@
                     for (let x = 0; x < matrix[y].length; x++) {
                         if (matrix[y][x] !== 0 && (
                             // Out of bounds check
-                            piece.pos.y + y + offsetY < 0 ||
                             piece.pos.y + y + offsetY >= ROWS ||
                             piece.pos.x + x + offsetX < 0 ||
                             piece.pos.x + x + offsetX >= COLS ||
-                            // Collision with another block
+                            // Collision with another block (only check if we're within board bounds)
                             (piece.pos.y + y + offsetY >= 0 && 
+                             tetrisGameState.board[piece.pos.y + y + offsetY] && 
                              tetrisGameState.board[piece.pos.y + y + offsetY][piece.pos.x + x + offsetX] !== 0)
                         )) {
                             return true;
@@ -1142,7 +1158,10 @@
                     row.forEach((value, x) => {
                         if (value !== 0) {
                             // Make sure we don't go out of bounds
-                            if (tetrisGameState.piece.pos.y + y >= 0) {
+                            if (tetrisGameState.piece.pos.y + y >= 0 && 
+                                tetrisGameState.piece.pos.y + y < ROWS && 
+                                tetrisGameState.piece.pos.x + x >= 0 && 
+                                tetrisGameState.piece.pos.x + x < COLS) {
                                 tetrisGameState.board[tetrisGameState.piece.pos.y + y][tetrisGameState.piece.pos.x + x] = value;
                             }
                         }
@@ -1203,6 +1222,9 @@
             
             // Function to restart the game
             function restartGame() {
+                // Recalculate sizes in case of screen size change
+                handleResize();
+                
                 tetrisGameState = createGameState();
                 tetrisGameState.piece = createPiece();
                 tetrisGameState.nextPiece = createPiece();
@@ -1233,8 +1255,57 @@
                 requestAnimationFrame(gameLoop);
             }
             
+            // Handle window resize for responsiveness
+            function handleResize() {
+                // Adjust canvas dimensions and block sizes based on screen size
+                if (window.innerWidth <= 768) {
+                    // Mobile layout
+                    canvas.width = 240;
+                    canvas.height = 400;
+                    nextPieceCanvas.width = 80;
+                    nextPieceCanvas.height = 80;
+                    
+                    // Keep the same number of columns, but reduce rows for mobile
+                    COLS = 10;
+                    ROWS = 16; // Reduced number of rows for mobile
+                } else {
+                    // Desktop layout
+                    canvas.width = 300;
+                    canvas.height = 600;
+                    nextPieceCanvas.width = 100;
+                    nextPieceCanvas.height = 100;
+                    
+                    COLS = 10;
+                    ROWS = 20;
+                }
+                
+                // Calculate the block sizes
+                BLOCK_SIZE = Math.floor(canvas.width / COLS);
+                NEXT_BLOCK_SIZE = Math.floor(nextPieceCanvas.width / 4);
+                
+                // If there's an active game, update it with new dimensions
+                if (tetrisGameState) {
+                    // We need to ensure the board has the correct dimensions
+                    const oldBoard = tetrisGameState.board;
+                    tetrisGameState.board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+                    
+                    // Copy the old board content to the new board
+                    for (let y = 0; y < Math.min(oldBoard.length, ROWS); y++) {
+                        for (let x = 0; x < Math.min(oldBoard[y].length, COLS); x++) {
+                            tetrisGameState.board[y][x] = oldBoard[y][x];
+                        }
+                    }
+                    
+                    drawBoard();
+                    drawNextPiece();
+                }
+            }
+            
             // Start the Tetris game
             function startTetrisGame() {
+                // Set up dimensions based on current screen size
+                handleResize();
+                
                 // Create a new game state
                 tetrisGameState = createGameState();
                 tetrisGameState.piece = createPiece();
@@ -1314,32 +1385,8 @@
             // Restart button event listener
             restartButton.addEventListener('click', restartGame);
             
-            // Handle window resize for responsiveness
-            function handleResize() {
-                // Adjust for mobile devices
-                if (window.innerWidth <= 768) {
-                    canvas.width = 240;
-                    canvas.height = 400;
-                } else {
-                    canvas.width = 300;
-                    canvas.height = 600;
-                }
-                
-                // Update block sizes
-                const blockSize = Math.floor(canvas.width / COLS);
-                
-                // Redraw the board with the new dimensions
-                if (tetrisGameState) {
-                    drawBoard();
-                    drawNextPiece();
-                }
-            }
-            
             // Listen for window resize events
             window.addEventListener('resize', handleResize);
-            
-            // Initial call to set the correct sizes
-            handleResize();
         });
     </script>
 </body>
